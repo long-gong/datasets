@@ -17,5 +17,11 @@ audio: $(COMMON_HDRS) Audio.cpp
 glove: $(COMMON_HDRS) Glove.cpp
 	$(CXX) $(CXXFLAGS) Glove.cpp -o $@ $(LDFLAGS)
 
+enron: $(COMMON_HDRS) Enron.cpp
+	$(CXX) $(CXXFLAGS) Enron.cpp -o $@ $(LDFLAGS)
+
+mnist: $(COMMON_HDRS) Mnist.cpp
+	$(CXX) $(CXXFLAGS) Mnist.cpp -o $@ $(LDFLAGS)
+
 clean:
-	$(RM) *.o binary-sample audio glove
+	$(RM) *.o binary-sample audio glove enron mnist
