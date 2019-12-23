@@ -5,6 +5,8 @@ RM=rm -rf
 
 COMMON_HDRS=Hdf5File.h create_lsh_codes.h
 
+all: audio glove enron mnist
+
 %.o: %.cpp 
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
