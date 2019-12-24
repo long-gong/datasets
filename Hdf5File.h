@@ -4,8 +4,8 @@
 #include <highfive/H5DataSet.hpp>
 #include <highfive/H5DataSpace.hpp>
 #include <highfive/H5File.hpp>
-#include <string>
 #include <memory>
+#include <string>
 
 using namespace HighFive;
 class Hdf5File {
@@ -68,15 +68,15 @@ public:
       n_end = dims.front();
     } else if (n_end > dims.front()) {
       throw std::out_of_range("The dataset ONLY has " +
-          std::to_string(dims.front()) +
-          " data points. Cannot read more than that");
+                              std::to_string(dims.front()) +
+                              " data points. Cannot read more than that");
     }
     if (d_end == -1) {
       d_end = dims.back();
     } else if (d_end > dims.back()) {
       throw std::out_of_range(
           "The data points in this dataset have a dimension of " +
-              std::to_string(dims.back()) + ", which is less than what you want");
+          std::to_string(dims.back()) + ", which is less than what you want");
     }
     size_t n_counts = n_end - n_start;
     size_t d_counts = d_end - d_start;
@@ -108,14 +108,13 @@ public:
     dataset.read(data);
   }
 
-  void read(std::string& data, const std::string &dataset_name) {
+  void read(std::string &data, const std::string &dataset_name) {
     auto dataset = _fp->getDataSet(dataset_name);
     dataset.read(data);
   }
 
   template <typename num_t>
-  void read(num_t &data,
-            const std::string &dataset_name) {
+  void read(num_t &data, const std::string &dataset_name) {
     auto dataset = _fp->getDataSet(dataset_name);
     dataset.read(&data);
   }
@@ -167,15 +166,15 @@ public:
       n_end = dims.front();
     } else if (n_end > dims.front()) {
       throw std::out_of_range("The dataset ONLY has " +
-          std::to_string(dims.front()) +
-          " data points. Cannot read more than that");
+                              std::to_string(dims.front()) +
+                              " data points. Cannot read more than that");
     }
     if (d_end == -1) {
       d_end = dims.back();
     } else if (d_end > dims.back()) {
       throw std::out_of_range(
           "The data points in this dataset have a dimension of " +
-              std::to_string(dims.back()) + ", which is less than what you want");
+          std::to_string(dims.back()) + ", which is less than what you want");
     }
     size_t n_counts = n_end - n_start;
     size_t d_counts = d_end - d_start;
@@ -195,7 +194,7 @@ public:
     // Only support writing the data as it is
     if (exists(dataset_name)) {
       throw HighFive::Exception("A dataset named " + dataset_name +
-          " already exists");
+                                " already exists");
     }
     return _fp->createDataSet<num_t>(dataset_name, HighFive::DataSpace(dims));
   }
@@ -233,6 +232,18 @@ public:
     dataset.write(data);
   }
 
+  // writes data to A[n_start..n_end, d_start..d_end]
+  // creates dataset if not exists, otherwise overwrites
+  template <typename num_t>
+  void write(const std::vector<num_t> &data, size_t n_start, size_t n_end,
+             const std::string &dataset_name) {
+    assert(n_start < n_end);
+
+    auto dataset = _fp->getDataSet(dataset_name);
+    size_t n_counts = n_end - n_start;
+    dataset.select({n_start, 0}, {n_counts, 1}).write(data);
+  }
+
   template <typename num_t>
   void write(const std::vector<std::vector<num_t>> &data, size_t n_start,
              size_t n_end, const std::string &dataset_name) {
@@ -251,15 +262,15 @@ public:
     auto dims = dataset.getSpace().getDimensions();
     if (n_end > dims.front()) {
       throw std::out_of_range("The dataset ONLY has " +
-          std::to_string(dims.front()) +
-          " data points. Cannot read more than that");
+                              std::to_string(dims.front()) +
+                              " data points. Cannot read more than that");
     }
     if (d_end == -1) {
       d_end = dims.back();
     } else if (d_end > dims.back()) {
       throw std::out_of_range(
           "The data points in this dataset have a dimension of " +
-              std::to_string(dims.back()) + ", which is less than what you want");
+          std::to_string(dims.back()) + ", which is less than what you want");
     }
     size_t n_counts = n_end - n_start;
     size_t d_counts = d_end - d_start;
