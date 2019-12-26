@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
   Hdf5File h5f(h5filename);
 
   h5f.write<uint64_t>(hamming_dataset, "train");
-  h5f.write<uint64_t>(hamming_dataset, "test");
+  h5f.write<uint64_t>(queries, "test");
 
   return 0;
 }
