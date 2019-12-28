@@ -94,8 +94,7 @@ void gen_queries(vector<uint64_t> *dataset, vector<uint64_t> *queries,
     queries->insert(queries->end(), dataset->begin() + ind * enc_dim,
                     dataset->begin() + (ind + 1) * enc_dim);
 
-    for (int j = 0; j < enc_dim; ++j)
-      (*dataset)[ind + j] = (*dataset)[n - (enc_dim - j)];
+for (int j = 0; j < enc_dim; ++j) (*dataset)[ind * enc_dim + j] = (*dataset)[(n - 1) * enc_dim + j];
     for (int j = 0; j < enc_dim; ++j)
       dataset->pop_back();
     --n;

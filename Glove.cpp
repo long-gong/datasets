@@ -94,10 +94,8 @@ void gen_queries(vector<uint64_t> *dataset, vector<uint64_t> *queries,
     queries->insert(queries->end(), dataset->begin() + ind * enc_dim,
                     dataset->begin() + (ind + 1) * enc_dim);
 
-    for (int j = 0; j < enc_dim; ++j)
-      (*dataset)[ind + j] = (*dataset)[n - (enc_dim - j)];
-    for (int j = 0; j < enc_dim; ++j)
-      dataset->pop_back();
+    for (int j = 0; j < enc_dim; ++j) (*dataset)[ind * enc_dim + j] = (*dataset)[(n - 1) * enc_dim + j];
+    for (int j = 0; j < enc_dim; ++j) dataset->pop_back();
     --n;
   }
 }
@@ -167,7 +165,7 @@ int main(int argc, char **argv) {
 
   auto hamming_dataset = lsh.fit(dataset);
 
-  hamming_dataset = dedup(hamming_dataset, m / 64);
+  hamming_dataset = dedup(hamming_dataset, enc_dim);
 
   vector<uint64_t> queries;
   gen_queries(&hamming_dataset, &queries, enc_dim);
