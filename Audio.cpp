@@ -1,11 +1,11 @@
+#include "Hdf5File.h"
 #include "create_lsh_codes.h"
+#include <cassert>
 #include <eigen3/Eigen/Dense>
 #include <random>
 #include <unordered_set>
 #include <vector>
 #include <xxhash.h>
-#include <cassert>
-#include "Hdf5File.h"
 
 using namespace std;
 using namespace Eigen;
@@ -106,10 +106,11 @@ void gen_queries(vector<uint64_t> *dataset, vector<uint64_t> *queries,
     queries->insert(queries->end(), dataset->begin() + ind * enc_dim,
                     dataset->begin() + (ind + 1) * enc_dim);
 
-    for (int j = 0; j < enc_dim; ++j) (*dataset)[ind * enc_dim + j] = (*dataset)[(n - 1) * enc_dim + j];
+    for (int j = 0; j < enc_dim; ++j)
+      (*dataset)[ind * enc_dim + j] = (*dataset)[(n - 1) * enc_dim + j];
     for (int j = 0; j < enc_dim; ++j)
       dataset->pop_back();
-    -- n;
+    --n;
   }
 }
 
@@ -181,15 +182,15 @@ int main(int argc, char **argv) {
 
   hamming_dataset = dedup(hamming_dataset, enc_dim);
 
-  vector<uint64_t > queries;
+  vector<uint64_t> queries;
   gen_queries(&hamming_dataset, &queries, enc_dim);
 
   string h5filename = string("audio-hamming-") + to_string(m) + ".h5";
 
-  Hdf5File  h5f(h5filename);
+  Hdf5File h5f(h5filename);
 
   h5f.write<uint64_t>(hamming_dataset, "train");
-   h5f.write<uint64_t>(queries, "test");
+  h5f.write<uint64_t>(queries, "test");
 
   return 0;
 }
