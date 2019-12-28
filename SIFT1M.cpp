@@ -30,8 +30,8 @@ bool read_point(FILE *file, Point *point) {
   if (fread(&d, sizeof(int), 1, file) != 1) {
     return false;
   }
-  float *buf = new float[d];
-  if (fread(buf, sizeof(float), d, file) != (size_t)d) {
+  int *buf = new int[d];
+  if (fread(buf, sizeof(int), d, file) != (size_t)d) {
     throw runtime_error("can't read a point");
   }
   point->resize(d);
@@ -73,7 +73,7 @@ Point cal_center(const vector<Point> &dataset) {
 }
 
 void recenter(vector<Point> &dataset, const Point &center) {
-  for (size_t i = 1; i < dataset.size(); ++i) {
+  for (size_t i = 0; i < dataset.size(); ++i) {
     dataset[i] -= center;
   }
 }

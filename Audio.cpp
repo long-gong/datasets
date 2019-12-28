@@ -85,7 +85,7 @@ Point cal_center(const vector<Point> &dataset) {
 }
 
 void recenter(vector<Point> &dataset, const Point &center) {
-  for (size_t i = 1; i < dataset.size(); ++i) {
+  for (size_t i = 0; i < dataset.size(); ++i) {
     dataset[i] -= center;
   }
 }
