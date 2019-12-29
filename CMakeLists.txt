@@ -7,3 +7,6 @@ find_package(HighFive 2.1 REQUIRED)
 add_definitions(-DDEBUG)
 add_executable(audio Audio.cpp)
 target_link_libraries(audio HighFive xxhash)
+
+add_executable(sift1b SIFT1B.cpp)
+target_link_libraries(sift1b HighFive xxhash)

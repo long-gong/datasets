@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
     read_dataset(base_filename, &dataset, DIM, BUFSIZ * i, BUFSIZ);
     tn += dataset.size();
     centers.push_back(cal_sum(dataset));
-    printf("%d out of %d groups were done ...\n", i + 1, ng);
+    printf("CC: %d out of %d groups were done ...\n", i + 1, ng);
   }
   
 
