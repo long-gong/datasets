@@ -4,9 +4,11 @@ LDFLAGS=-L /usr/lib/x86_64-linux-gnu/hdf5/serial/ -lxxhash -lhdf5
 RM=rm -rf
 
 COMMON_HDRS=Hdf5File.h create_lsh_codes.h
-TARGETS = audio glove enron mnist sift1m
+TARGETS = audio glove enron mnist sift1m gist1m
+TARGETS_FOR_LF = sift1b gist80m
 
-all: $(TARGETS)
+
+all: $(TARGETS) $(TARGETS_FOR_LF)
 
 %.o: %.cpp 
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
@@ -32,6 +34,9 @@ sift1m: $(COMMON_HDRS) SIFT1M.cpp
 gist1m: $(COMMON_HDRS) GIST1M.cpp
 	$(CXX) $(CXXFLAGS) GIST1M.cpp -o $@ $(LDFLAGS)
 
+sift1b: $(COMMON_HDRS) SIFT1B.cpp
+	$(CXX) $(CXXFLAGS) SIFT1B.cpp -o $@ $(LDFLAGS)
+
 run: $(TARGETS)
 	./audio 192
 	./glove 128
@@ -40,8 +45,13 @@ run: $(TARGETS)
 	./sift1m 128
 	./gist1m 960
 
+
+run-lf: $(TARGETS_FOR_LF)
+	./sift1b 128
+
+
 clean:
-	$(RM) *.o binary-sample audio glove enron mnist 
+	$(RM) *.o binary-sample $(TARGETS) $(TARGETS_FOR_LF)
 
 distclean: clean 
 	$(RM) *.h5

@@ -6,14 +6,16 @@
 #include <unordered_set>
 #include <vector>
 #include <xxhash.h>
+#include "helper.h"
 
 using namespace std;
 using namespace Eigen;
 
-const char *DATASET_DIR = "datasets/SIFT1B";
-// if disk is enough, it would be better to copy bigann_base.bvecs to `DATASET_DIR`
+// if disk is enough, it would be better to copy bigann_base.bvecs to `datasets/SIFT1B`
+const char *DATASET_DIR = "/media/gtuser/LGLarge/ann-datasets/Euclidean/inria/ANN_SIFT1B/";//"datasets/SIFT1B";
 const char *DATASET_FILENAME = "/media/gtuser/LGLarge/ann-datasets/Euclidean/inria/ANN_SIFT1B/bigann_base.bvecs";
 const char *QUERY_FILENAME = "/media/gtuser/LGLarge/ann-datasets/Euclidean/inria/ANN_SIFT1B/bigann_query.bvecs";
+
 const int NUM_QUERIES = 10000;
 const int SEED = 4057218;
 const unsigned C_SEED = 91023221u;
@@ -111,7 +113,7 @@ Point cal_sum(const vector<Point> &dataset) {
 }
 
 void recenter(vector<Point> &dataset, const Point &center) {
-  for (size_t i = 1; i < dataset.size(); ++i) {
+  for (size_t i = 0; i < dataset.size(); ++i) {
     dataset[i] -= center;
   }
 }
@@ -165,7 +167,7 @@ vector<uint64_t> dedup(const vector<uint64_t> &dataset, int enc_dim) {
   vector<uint64_t> temp;
   auto n = dataset.size() / enc_dim;
 
-  fprintf(stdout, "Before dedup: # of points: %d\n", n);
+  fprintf(stdout, "Before dedup: # of points: %lu\n", n);
 
   for (unsigned i = 0; i < n; ++i) {
     temp.clear();
@@ -174,7 +176,7 @@ vector<uint64_t> dedup(const vector<uint64_t> &dataset, int enc_dim) {
     myset.insert(temp);
   }
 
-  fprintf(stdout, "After: # of points: %d\n", myset.size());
+  fprintf(stdout, "After dedup: # of points: %lu\n", myset.size());
 
   vector<uint64_t> unique;
 
@@ -186,7 +188,7 @@ vector<uint64_t> dedup(const vector<uint64_t> &dataset, int enc_dim) {
 }
 
 void usage(const char *progname) {
-  printf("Usage: %s HAMMING-DIM [DATASET-FILENAMENAME]\n\n", progname);
+  printf("Usage: %s HAMMING-DIM [DATASET-DIR]\n\n", progname);
   exit(1);
 }
 
@@ -195,21 +197,21 @@ int main(int argc, char **argv) {
   char *p;
   progname = ((p = strrchr(argv[0], '/')) ? ++p : argv[0]);
   string dirname = DATASET_DIR;
-  string filename = DATASET_FILENAME;
 
   int m = atoi(argv[1]);
   if (argc > 3) {
     usage(progname);
   }
   if (argc == 3) {
-    filename = string(argv[2]);
+    dirname = string(argv[2]);
   }
-  FILE *fp = fopen(filename.c_str(), "rb");
+  auto base_filename = dirname + "/bigann_base.bvecs";
+  FILE *fp = fopen(base_filename.c_str(), "rb");
   if (!fp) {
     perror("fread() failed");
   }
   auto N = get_dataset_size(fp);
-  printf("Get #points: %lld, and #dim: %d\n", N, DIM);
+  printf("Get #points: %lu, and #dim: %d\n", N, DIM);
   fclose(fp);
   auto ng = int(ceil(N * 1.0 / BUFSIZ));
 
@@ -221,21 +223,22 @@ int main(int argc, char **argv) {
   printf("Calculating center ...\n");
   for (auto i = 0; i < ng; ++i) {
     vector<Point> dataset;
-    read_dataset(filename.c_str(), &dataset, DIM, BUFSIZ * i,
-                 BUFSIZ);
+    read_dataset(base_filename, &dataset, DIM, BUFSIZ * i, BUFSIZ);
     tn += dataset.size();
-    centers.push_back(cal_center(dataset));
+    centers.push_back(cal_sum(dataset));
     printf("%d out of %d groups were done ...", i + 1, ng);
   }
   
 
   assert(tn == N);
 
+  auto query_filename = dirname + "/bigann_query.bvecs";
+
   {
     vector<Point> queries;
     read_dataset(QUERY_FILENAME, &queries);
     tn += queries.size();
-    centers.push_back(cal_center(queries));
+    centers.push_back(cal_sum(queries));
   }
 
   auto center = cal_center(centers) / tn;
@@ -249,6 +252,7 @@ int main(int argc, char **argv) {
     fwrite(&temp, sizeof(temp), 1, cfp);
   }
   fclose(cfp);
+  tofile<Point>({center}, "sift1b-center.txt", 1);
 
   printf("Calculating LSH codes ...\n");
   auto enc_dim = m / 64;
@@ -261,17 +265,21 @@ int main(int argc, char **argv) {
   for (int k = 0; k < N_FILES; ++k) {
     auto fn = string("temp/") + to_string(k) + ".dat";
     temp_ofiles[k] = fopen(fn.c_str(), "wb+");
+    if (!temp_ofiles[k]) {
+      perror("fopen() failed");
+    }
   }
 
   for (auto i = 0; i < ng; ++i) {
     vector<Point> dataset;
     vector<vector<uint64_t>> points_eachfile(N_FILES);
-    read_dataset(filename.c_str(), &dataset, DIM, BUFSIZ * i,
+    read_dataset(base_filename, &dataset, DIM, BUFSIZ * i,
                  BUFSIZ);
     recenter(dataset, center);
     auto hamming_dataset = lsh.fit(dataset);
     for (int j = 0; j < dataset.size(); ++j) {
       auto fid = (hamming_dataset[j * enc_dim] & N_FILES_MASK); // get the last few digits
+      assert (fid < N_FILES && fid >= 0);
       points_eachfile[fid].insert(points_eachfile[fid].end(),
                                   hamming_dataset.begin() + j * enc_dim,
                                   hamming_dataset.begin() + (j + 1) * enc_dim);
@@ -300,7 +308,9 @@ int main(int argc, char **argv) {
 
     vector<uint64_t> dataset(sz);
 
-    fread(&dataset[0], sizeof(uint64_t), sz,  temp_ofiles[k]);
+    if (fread(&dataset[0], sizeof(uint64_t), sz,  temp_ofiles[k]) != sz) {
+      perror("fread() failed");
+    }
 
     dataset = dedup(dataset, enc_dim);
 
@@ -342,11 +352,17 @@ int main(int argc, char **argv) {
   vector<uint64_t> queries;
   size_t tc = 0;
   for (size_t i = 0, j = 0; i < nng; ++i) {
-    cumsum += n_each;
+    
     vector<uint64_t> data(n_each * enc_dim, 0ull);
     auto tsz = fread(&data[0],  sizeof(uint64_t), n_each * enc_dim, bf);
+
+    assert(tsz == data.size() || (tsz < data.size() && i == nng - 1));
     if (tsz < data.size())
       data.resize(tsz);
+
+    cumsum += tsz / enc_dim;
+
+  
     vector<uint64_t> train;
 
     for (int j = 0; j < tsz / enc_dim; ++j) {
@@ -365,6 +381,7 @@ int main(int argc, char **argv) {
     tc += train.size();
     cumsum_o = cumsum;
   }
+
   fclose(tfp);
   fclose(bf);
 
