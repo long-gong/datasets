@@ -7,6 +7,8 @@
 #include <vector>
 #include <xxhash.h>
 
+#include "helper.h"
+
 using namespace std;
 using namespace Eigen;
 
@@ -30,8 +32,10 @@ bool read_point(FILE *file, Point *point) {
   if (fread(&d, sizeof(int), 1, file) != 1) {
     return false;
   }
-  int *buf = new int[d];
-  if (fread(buf, sizeof(int), d, file) != (size_t)d) {
+  // pay attention, although the original data is integral, it is still 
+  // stored as floating-point
+  float *buf = new float[d];
+  if (fread(buf, sizeof(float), d, file) != (size_t)d) {
     throw runtime_error("can't read a point");
   }
   point->resize(d);
@@ -114,7 +118,7 @@ vector<uint64_t> dedup(const vector<uint64_t> &dataset, int enc_dim) {
   vector<uint64_t> temp;
   auto n = dataset.size() / enc_dim;
 
-  fprintf(stdout, "Before dedup: # of points: %d\n", n);
+  fprintf(stdout, "Before dedup: # of points: %lu\n", n);
 
   for (unsigned i = 0; i < n; ++i) {
     temp.clear();
@@ -123,7 +127,7 @@ vector<uint64_t> dedup(const vector<uint64_t> &dataset, int enc_dim) {
     myset.insert(temp);
   }
 
-  fprintf(stdout, "After: # of points: %d\n", myset.size());
+  fprintf(stdout, "After dedup: # of points: %lu\n", myset.size());
 
   vector<uint64_t> unique;
 
@@ -156,21 +160,27 @@ int main(int argc, char **argv) {
   vector<Point> dataset, queries_tmp;
   read_dataset(dirname + "/sift_base.fvecs", &dataset);
   read_dataset(dirname + "/sift_query.fvecs", &queries_tmp);
-  dataset.insert(dataset.begin(), queries_tmp.begin(), queries_tmp.end());
+  dataset.insert(dataset.end(), queries_tmp.begin(), queries_tmp.end());
 
+  tofile<Point>(dataset, "sift1m-for-debug.txt", 10);
   auto center = cal_center(dataset);
 
   recenter(dataset, center);
 
   unsigned dim = dataset.front().size();
+
+  printf("original:\n\t#points: %lu, #dim: %u\n", dataset.size(), dim);
+
   auto enc_dim = m / 64;
 
   SimHashCodes lsh(dim, m, C_SEED);
 
   auto hamming_dataset = lsh.fit(dataset);
 
-  hamming_dataset = dedup(hamming_dataset, m / 64);
+  hamming_dataset = dedup(hamming_dataset, enc_dim);
 
+  printf("converted:\n\t#points: %lu, #dim: %u\n", hamming_dataset.size() / enc_dim, m);
+  
   vector<uint64_t> queries;
   gen_queries(&hamming_dataset, &queries, enc_dim);
 

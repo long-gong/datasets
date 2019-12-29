@@ -176,11 +176,16 @@ int main(int argc, char **argv) {
   unsigned dim = dataset.front().size();
   auto enc_dim = m / 64;
 
+  printf("original:\n\t#points: %ul, #dim: %u\n", dataset.size(), dim);
+
   SimHashCodes lsh(dim, m, C_SEED);
 
   auto hamming_dataset = lsh.fit(dataset);
 
   hamming_dataset = dedup(hamming_dataset, enc_dim);
+
+  printf("converted:\n\t#points: %ul, #dim: %u\n", hamming_dataset.size() / enc_dim, m);
+  
 
   vector<uint64_t> queries;
   gen_queries(&hamming_dataset, &queries, enc_dim);

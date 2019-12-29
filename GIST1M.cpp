@@ -1,5 +1,6 @@
 #include "Hdf5File.h"
 #include "create_lsh_codes.h"
+#include "helper.h"
 #include <cassert>
 #include <eigen3/Eigen/Dense>
 #include <random>
@@ -73,7 +74,7 @@ Point cal_center(const vector<Point> &dataset) {
 }
 
 void recenter(vector<Point> &dataset, const Point &center) {
-  for (size_t i = 1; i < dataset.size(); ++i) {
+  for (size_t i = 0; i < dataset.size(); ++i) {
     dataset[i] -= center;
   }
 }
@@ -114,7 +115,7 @@ vector<uint64_t> dedup(const vector<uint64_t> &dataset, int enc_dim) {
   vector<uint64_t> temp;
   auto n = dataset.size() / enc_dim;
 
-  fprintf(stdout, "Before dedup: # of points: %d\n", n);
+  fprintf(stdout, "Before dedup: # of points: %lu\n", n);
 
   for (unsigned i = 0; i < n; ++i) {
     temp.clear();
@@ -123,7 +124,7 @@ vector<uint64_t> dedup(const vector<uint64_t> &dataset, int enc_dim) {
     myset.insert(temp);
   }
 
-  fprintf(stdout, "After: # of points: %d\n", myset.size());
+  fprintf(stdout, "After dedup: # of points: %lu\n", myset.size());
 
   vector<uint64_t> unique;
 
@@ -156,20 +157,25 @@ int main(int argc, char **argv) {
   vector<Point> dataset, queries_tmp;
   read_dataset(dirname + "/gist_base.fvecs", &dataset);
   read_dataset(dirname + "/gist_query.fvecs", &queries_tmp);
-  dataset.insert(dataset.begin(), queries_tmp.begin(), queries_tmp.end());
+  dataset.insert(dataset.end(), queries_tmp.begin(), queries_tmp.end());
 
+  tofile<Point>(dataset, "gist1m-for-debug.txt", 10);
   auto center = cal_center(dataset);
+  tofile<Point>({center}, "gist1m-center.txt", 1);
 
   recenter(dataset, center);
 
   unsigned dim = dataset.front().size();
   auto enc_dim = m / 64;
+  printf("original:\n\t#points: %lu, #dim: %u\n", dataset.size(), dim);
 
   SimHashCodes lsh(dim, m, C_SEED);
 
   auto hamming_dataset = lsh.fit(dataset);
 
-  hamming_dataset = dedup(hamming_dataset, m / 64);
+  hamming_dataset = dedup(hamming_dataset, enc_dim);
+  printf("converted:\n\t#points: %lu, #dim: %u\n",
+         hamming_dataset.size() / enc_dim, m);
 
   vector<uint64_t> queries;
   gen_queries(&hamming_dataset, &queries, enc_dim);

@@ -26,9 +26,10 @@ public:
     std::bitset<64> bits;
 
     int ind = 0;
+    
     for (const auto& point : X) {
       auto raw_codes = mat_ * point;
-      for (unsigned i = 0, j = 0; i < raw_codes.size(); ++i, ++j) {
+      for (unsigned i = 0, j = 0; i < raw_codes.size(); ++i) {
         if (raw_codes(i) >= 0) {
           bits[j] = true;
         }
@@ -36,6 +37,8 @@ public:
           j = 0;
           Y.push_back(bits.to_ullong());
           bits.reset();
+        } else {
+          ++ j;
         }
       }
       ++ ind;
