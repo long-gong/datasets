@@ -13,8 +13,6 @@ using namespace Eigen;
 
 // if disk is enough, it would be better to copy bigann_base.bvecs to `datasets/SIFT1B`
 const char *DATASET_DIR = "/media/gtuser/LGLarge/ann-datasets/Euclidean/inria/ANN_SIFT1B/";//"datasets/SIFT1B";
-const char *DATASET_FILENAME = "/media/gtuser/LGLarge/ann-datasets/Euclidean/inria/ANN_SIFT1B/bigann_base.bvecs";
-const char *QUERY_FILENAME = "/media/gtuser/LGLarge/ann-datasets/Euclidean/inria/ANN_SIFT1B/bigann_query.bvecs";
 
 const int NUM_QUERIES = 10000;
 const int SEED = 4057218;
@@ -226,7 +224,7 @@ int main(int argc, char **argv) {
     read_dataset(base_filename, &dataset, DIM, BUFSIZ * i, BUFSIZ);
     tn += dataset.size();
     centers.push_back(cal_sum(dataset));
-    printf("%d out of %d groups were done ...", i + 1, ng);
+    printf("%d out of %d groups were done ...\n", i + 1, ng);
   }
   
 
@@ -236,7 +234,7 @@ int main(int argc, char **argv) {
 
   {
     vector<Point> queries;
-    read_dataset(QUERY_FILENAME, &queries);
+    read_dataset(query_filename, &queries);
     tn += queries.size();
     centers.push_back(cal_sum(queries));
   }
@@ -288,7 +286,7 @@ int main(int argc, char **argv) {
       fwrite(&points_eachfile[k][0], sizeof(uint64_t), points_eachfile[k].size(),
              temp_ofiles[k]);
     }
-    printf("%d out of %d groups were done ...", i + 1, ng);
+    printf("%d out of %d groups were done ...\n", i + 1, ng);
   }
   printf("Done\n");
 
@@ -321,7 +319,7 @@ int main(int argc, char **argv) {
     fwrite(&dataset[0], sizeof(uint64_t), dataset.size(), bf);
 
     fclose(temp_ofiles[k]);
-    printf("%d out of %d files were done ...", k + 1,N_FILES);
+    printf("%d out of %d files were done ...\n", k + 1,N_FILES);
   }
 
   unordered_set<size_t> queries_ind;
