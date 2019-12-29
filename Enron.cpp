@@ -114,7 +114,7 @@ vector<uint64_t> dedup(const vector<uint64_t> &dataset, int enc_dim) {
   vector<uint64_t> temp;
   auto n = dataset.size() / enc_dim;
 
-  fprintf(stdout, "Before dedup: # of points: %d\n", n);
+  fprintf(stdout, "Before dedup: # of points: %lu\n", n);
 
   for (unsigned i = 0; i < n; ++i) {
     temp.clear();
@@ -123,7 +123,7 @@ vector<uint64_t> dedup(const vector<uint64_t> &dataset, int enc_dim) {
     myset.insert(temp);
   }
 
-  fprintf(stdout, "After dedup: # of points: %d\n", myset.size());
+  fprintf(stdout, "After dedup: # of points: %lu\n", myset.size());
 
   vector<uint64_t> unique;
 
@@ -163,7 +163,7 @@ int main(int argc, char **argv) {
   unsigned dim = dataset.front().size();
   auto enc_dim = m / 64;
 
-  printf("original:\n\t#points: %ul, #dim: %u\n", dataset.size(), dim);
+  printf("original:\n\t#points: %lu, #dim: %u\n", dataset.size(), dim);
 
   SimHashCodes lsh(dim, m, C_SEED);
 
@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
 
   hamming_dataset = dedup(hamming_dataset, enc_dim);
 
-  printf("converted:\n\t#points: %ul, #dim: %u\n", hamming_dataset.size() / enc_dim, m);
+  printf("converted:\n\t#points: %lu, #dim: %u\n", hamming_dataset.size() / enc_dim, m);
   
 
   vector<uint64_t> queries;
