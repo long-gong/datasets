@@ -12,3 +12,6 @@ target_link_libraries(audio HighFive xxhash)
 add_definitions(-DCLION_DEBUG)
 add_executable(sift1b SIFT1B.cpp)
 target_link_libraries(sift1b HighFive xxhash)
+
+add_executable(gist80m GIST80M.cpp)
+target_link_libraries(gist80m HighFive xxhash)
