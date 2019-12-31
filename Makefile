@@ -37,6 +37,10 @@ gist1m: $(COMMON_HDRS) GIST1M.cpp
 sift1b: $(COMMON_HDRS) SIFT1B.cpp
 	$(CXX) $(CXXFLAGS) SIFT1B.cpp -o $@ $(LDFLAGS)
 
+gist80m: $(COMMON_HDRS) GIST80M.cpp
+	$(CXX) $(CXXFLAGS) SIFT1B.cpp -o $@ $(LDFLAGS)
+
+	
 run: $(TARGETS)
 	./audio 192
 	./glove 128
