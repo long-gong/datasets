@@ -1,0 +1,1 @@
+bigann_base.bvecs is just the first 10000 of the original dataset, which we provided here for debugging purpose!

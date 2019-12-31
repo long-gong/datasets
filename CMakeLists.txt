@@ -8,5 +8,7 @@ add_definitions(-DDEBUG)
 add_executable(audio Audio.cpp)
 target_link_libraries(audio HighFive xxhash)
 
+
+add_definitions(-DCLION_DEBUG)
 add_executable(sift1b SIFT1B.cpp)
 target_link_libraries(sift1b HighFive xxhash)

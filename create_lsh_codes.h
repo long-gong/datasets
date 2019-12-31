@@ -43,7 +43,7 @@ public:
       }
       ++ ind;
       if (ind % INTERVAL == 0) {
-        std::cout << ind << " out of " << X.size() << " finished ..." << std::endl;
+        std::cout << "SimHashCodes::fit() ==> " << ind << " out of " << X.size() << " finished ..." << std::endl;
       }
     }
 
