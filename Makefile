@@ -48,6 +48,7 @@ run: $(TARGETS)
 
 run-lf: $(TARGETS_FOR_LF)
 	./sift1b 128
+	./gist80m 384
 
 
 clean:

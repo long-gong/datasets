@@ -97,7 +97,7 @@ void read_dataset(string file_name, vector<Point> *dataset, int dim, int start,
     throw runtime_error("can't open the file with the dataset");
   }
 
-  int vecsizeof = 4 + dim;
+  int vecsizeof = sizeof(float) * dim;
   // here overflow happens (so must convert to long int)
   fseek(file, (long int)start * vecsizeof, SEEK_SET);
   Point p;
