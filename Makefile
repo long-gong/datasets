@@ -1,7 +1,9 @@
 CXX=g++
-CXXFLAGS=-I/usr/include/hdf5/serial -std=c++14 -O3
+# CXXFLAGS=-I/usr/include/hdf5/serial -std=c++14 -O3
+CXXFLAGS=-I/usr/include/hdf5/serial -std=c++14 -O3 -DDEBUG=1
 LDFLAGS=-L /usr/lib/x86_64-linux-gnu/hdf5/serial/ -lxxhash -lhdf5
-RM=rm -rf
+# RM=rm -rf
+RM = gio trash -f
 
 COMMON_HDRS=Hdf5File.h create_lsh_codes.h
 TARGETS = audio glove enron mnist sift1m gist1m
@@ -38,7 +40,7 @@ sift1b: $(COMMON_HDRS) SIFT1B.cpp
 	$(CXX) $(CXXFLAGS) SIFT1B.cpp -o $@ $(LDFLAGS)
 
 gist80m: $(COMMON_HDRS) GIST80M.cpp
-	$(CXX) $(CXXFLAGS) SIFT1B.cpp -o $@ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) GIST80M.cpp -o $@ $(LDFLAGS)
 
 
 run: $(TARGETS)
