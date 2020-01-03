@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt-get install libhdf5-dev libeigen3-dev gio
+sudo apt-get install libhdf5-dev libeigen3-dev 
 
 cd /tmp
 rm -rf HighFive xxHash
