@@ -44,7 +44,7 @@ int DIM = -1;
 const int N_EACH = int(1e7);
 // please increase this value if your PC has a small amount of DRAM
 const int N_FILES = 128;
-const uint64_t N_FILES_MASK = 0xf7;
+const uint64_t N_FILES_MASK = 0x7f;
 XXH64_hash_t const H_SEED = 0; /* or any other value */
 #endif
 
@@ -419,7 +419,7 @@ int main(int argc, char **argv)
 
   for (int k = 0; k < N_FILES; ++k)
   {
-    auto fn = string("temp/") + to_string(k) + ".dat";
+    auto fn = string("temp_sift1b/") + to_string(k) + ".dat";
     temp_ofiles[k] = fopen(fn.c_str(), "wb+");
     if (!temp_ofiles[k])
     {

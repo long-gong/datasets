@@ -41,10 +41,10 @@ const int SEED = 4057218;
 const unsigned C_SEED = 91023221u;
 const int DIM = 384;
 // please decrease this value if your PC has a small amount of DRAM
-const int N_EACH = int(1e7);
+const int N_EACH = int(1e6);
 // please increase this value if your PC has a small amount of DRAM
 const int N_FILES = 128;
-const uint64_t N_FILES_MASK = 0xf7;
+const uint64_t N_FILES_MASK = 0x7f;
 XXH64_hash_t const H_SEED = 0; /* or any other value */
 #endif
 
@@ -404,7 +404,7 @@ int main(int argc, char **argv)
 
   for (int k = 0; k < N_FILES; ++k)
   {
-    auto fn = string("temp/") + to_string(k) + ".dat";
+    auto fn = string("temp_gist80m/") + to_string(k) + ".dat";
     temp_ofiles[k] = fopen(fn.c_str(), "wb+");
     if (!temp_ofiles[k])
     {
