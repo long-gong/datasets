@@ -42,8 +42,8 @@ sift1b: $(COMMON_HDRS) SIFT1B.cpp
 gist80m: $(COMMON_HDRS) GIST80M.cpp
 	$(CXX) $(CXXFLAGS) GIST80M.cpp -o $@ $(LDFLAGS)
 
-gist80m-std: $(COMMON_HDRS) GIST80M-STD.cpp
-	$(CXX) $(CXXFLAGS) GIST80M-STD.cpp -o $@ $(LDFLAGS)
+gist80m-std: $(COMMON_HDRS) GIST80M_STD.cpp
+	$(CXX) $(CXXFLAGS) GIST80M_STD.cpp -o $@ $(LDFLAGS)
 
 run: $(TARGETS)
 	./audio 192

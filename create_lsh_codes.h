@@ -28,7 +28,7 @@ public:
 
     std::bitset<64> bits;
     int ind = 0;
-    unsigned enc_dim = d_ / 64;
+    unsigned enc_dim = m_ / 64;
     std::vector<uint64_t> Y(enc_dim * X.size());
 
     for (const auto &point : X)

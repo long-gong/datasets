@@ -2,16 +2,16 @@
 #include "create_lsh_codes_std.h"
 #include "helper.h"
 #include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <random>
 #include <unordered_set>
 #include <vector>
 #include <xxhash.h>
-#include <cstdio>
-#include <cstdlib>
 
 #include "Timer.hpp"
 using namespace std;
-using namespace Eigen;
 
 // if disk is enough, it would be better to copy tinygist80million.bin to
 // `datasets/GIST80M`
@@ -61,8 +61,8 @@ const char *getCentersCacheFileName() {
   return CsCF.c_str();
 }
 
-
-size_t get_dataset_size(FILE *fp) {
+size_t get_dataset_size(FILE *fp // BINARY file handler
+) {
   int cur_pos = ftell(fp);
   rewind(fp);
   size_t vecsizeof = sizeof(float) * DIM;
@@ -72,46 +72,56 @@ size_t get_dataset_size(FILE *fp) {
   return n;
 }
 
-void read_dataset(string file_name, vector<float> &dataset, int dim, int start,
-                  int size) {
+// read (partial) dataset from file
+void read_dataset(const string &file_name, // BINARY filename
+                  vector<float> &dataset,  // dataset (output)
+                  int dim,                 // data dimension
+                  int start,               // reading start position
+                  int size                 // how many (points)
+) {
   FILE *file = fopen(file_name.c_str(), "rb");
   if (!file) {
     throw runtime_error("can't open the file with the dataset");
   }
 
-  int vecsizeof = sizeof(float) * dim;
+  int vecsizeof = sizeof(float) * dim; // size of each point
   // here overflow happens (so must convert to long int)
   fseek(file, (long int)start * vecsizeof, SEEK_SET);
 
-    size_t sz = (size_t)size * dim;
+  size_t sz = (size_t)size * dim; // number of total coordinates for all points
   dataset.resize(sz);
   auto read_sz = fread(&dataset[0], sizeof(float), sz, file);
-    dataset.resize(read_sz);
+  dataset.resize(read_sz);
   if (fclose(file)) {
     throw runtime_error("fclose() error");
   }
 }
 
-void read_dataset(string file_name, vector<float> &dataset) {
+// read the entire dataset from file
+void read_dataset(string file_name,      // BINARY filename
+                  vector<float> &dataset // dataset (output)
+) {
   FILE *file = fopen(file_name.c_str(), "rb");
   if (!file) {
     throw runtime_error("can't open the file with the dataset");
   }
 
-  fseek(fp, 0, SEEK_END);
-  size_t sz = ftell(fp) / sizeof(float);
-  rewind(fp);
+  fseek(file, 0, SEEK_END);
+  size_t sz = ftell(file) / sizeof(float);
+  rewind(file);
 
   dataset.resize(sz);
   auto read_sz = fread(&dataset[0], sizeof(float), sz, file);
-    assert (read_sz == sz);
+  assert(read_sz == sz);
   if (fclose(file)) {
     throw runtime_error("fclose() error");
   }
 }
 
-
-bool read_center(FILE *file, std::vector<float>& center) {
+// read center point from file (saved in fvecs format)
+bool read_center(FILE *file,                // BINARY file handler
+                 std::vector<float> &center // center coordinates (output)
+) {
   int d;
   if (fread(&d, sizeof(int), 1, file) != 1) {
     return false;
@@ -119,62 +129,81 @@ bool read_center(FILE *file, std::vector<float>& center) {
   assert(d == DIM);
 
   center.resize(d);
-  return fread(&center[0], sizeof(float), d, file) == (size_t)d) ;
+  return fread(&center[0], sizeof(float), d, file) == (size_t)d;
 }
 
-void read_centers(string file_name, std::vector<vector<float>> &centers, int &tn) {
+// read centers from file
+void read_centers(string file_name,                    // BINARY filename
+                  std::vector<vector<float>> &centers, // centers (output)
+                  int &tn                              // total number of points
+) {
   FILE *file = fopen(file_name.c_str(), "rb");
   if (!file) {
     throw runtime_error("can't open the file with the dataset");
   }
 
-  if (fread(tn, sizeof(int), 1, file) != 1) {
+  if (fread(&tn, sizeof(int), 1, file) != 1) {
     throw runtime_error("fread() error");
   }
+
   vector<float> p;
   centers.clear();
   while (read_center(file, p)) {
     centers.push_back(p);
   }
+
   if (fclose(file)) {
     throw runtime_error("fclose() error");
   }
 }
 
-std::vector<float> cal_sum(const vector<float> &dataset, unsigned dim) {
+// calculate sum with points storing in flat vector
+std::vector<float> cal_sum(const vector<float> &dataset, // data points
+                           unsigned dim                  // dimension
+) {
   std::vector<float> sum(dim, 0.0f);
-    size_t n = dataset.size() / dim;
+  size_t n = dataset.size() / dim;
   for (size_t i = 0; i < n; ++i) {
-    for (unsigned j = 0;j < dim;++ j) {
-        sum[j] += dataset[i * dim + j];
+    for (unsigned j = 0; j < dim; ++j) {
+      sum[j] += dataset[i * dim + j];
     }
   }
   return sum;
 }
 
-std::vector<float> cal_center(const vector<std::vector<float>> &dataset) {
-  // find the center of mass
-  std::vector<float> center = dataset[0];
-  unsigned dim = center.size();
-  for (size_t i = 1; i < dataset.size(); ++i) {
-    for (unsigned j = 0;j < dim;++ j) 
-    {
-        center[j] += dataset[i][j];
+// calculate sum with points storing in vector of vectors
+std::vector<float> cal_sum(const vector<vector<float>> &dataset) {
+  unsigned dim = dataset.front().size();
+  std::vector<float> sum(dim, 0.0f);
+  size_t n = dataset.size() / dim;
+  for (size_t i = 0; i < n; ++i) {
+    for (unsigned j = 0; j < dim; ++j) {
+      sum[j] += dataset[i][j];
     }
   }
-  for (unsigned j = 0;j < dim;++ j) 
-  center[j] /= dataset.size();
-
-  return center;
+  return sum;
 }
 
+// recenter
+void recenter(vector<float> &dataset,          // data points
+              const std::vector<float> &center // center
+) {
+  unsigned dim = center.size();
+  size_t n = dataset.size() / dim;
+  for (size_t i = 0; i < n; ++i) {
+    for (unsigned j = 0; j < dim; ++j)
+      dataset[i * dim + j] -= center[j];
+  }
+}
 
 /*
  * Chooses a random subset of the dataset to be the queries. The queries are
  * taken out of the dataset.
  */
-void gen_queries(vector<uint64_t> *dataset, vector<uint64_t> *queries,
-                 int enc_dim) {
+void gen_queries(vector<uint64_t> *dataset, // dataset (input/output)
+                 vector<uint64_t> *queries, // queries (output)
+                 int enc_dim                // dimension after encoding
+) {
   mt19937_64 gen(SEED);
   queries->clear();
   auto n = dataset->size() / enc_dim;
@@ -200,6 +229,7 @@ struct MyHash {
   }
 };
 
+// remove duplicated points
 vector<uint64_t> dedup(const vector<uint64_t> &dataset, int enc_dim) {
   unordered_set<vector<uint64_t>, MyHash> myset;
   vector<uint64_t> temp;
@@ -273,10 +303,10 @@ int main(int argc, char **argv) {
       read_dataset(base_filename, dataset, DIM, N_EACH * i, N_EACH);
 #ifdef DEBUG
       if (i == 0)
-        tofile<Point>(dataset, "gist80m-debugging-ds.txt", 10);
+        tofile<float>(dataset, "gist80m-debugging-ds.txt", 10);
 #endif
       tn += dataset.size();
-      centers.push_back(cal_sum(dataset));
+      centers.push_back(cal_sum(dataset, DIM));
       printf("CC: %d out of %d groups were done ...\n", i + 1, ng);
     }
 
@@ -293,9 +323,9 @@ int main(int argc, char **argv) {
         int cen_dim = cen.size();
         if (fwrite(&cen_dim, sizeof(int), 1, cfp) != 1)
           perror("fwrite() failed");
-        
+
         if (fwrite(&cen[0], sizeof(float), cen_dim, cfp) != cen_dim) {
-            perror("fwrite() failed");
+          perror("fwrite() failed");
         }
       }
       fclose(cfp);
@@ -304,8 +334,8 @@ int main(int argc, char **argv) {
 
   assert(tn > 0);
   std::vector<float> center = cal_sum(centers);
-  for (unsigned i = 0;i < DIM;++ i)
-  center[i] /= tn;
+  for (unsigned i = 0; i < DIM; ++i)
+    center[i] /= tn;
   printf("Done\n");
 
   FILE *cfp = fopen(getCenterCacheFileName(), "wb");
@@ -313,7 +343,7 @@ int main(int argc, char **argv) {
   fwrite(&DIM, sizeof(DIM), 1, cfp);
   fwrite(&center[0], sizeof(float), DIM, cfp);
   fclose(cfp);
-  tofile<float>(center, "GIST80M-center.txt", 1);
+  tofile<float>(center, "GIST80M-center.txt", DIM);
 
   printf("Calculating LSH codes ...\n");
   auto enc_dim = m / 64;
@@ -344,25 +374,25 @@ int main(int argc, char **argv) {
 
     tot_exec_s += er;
 
-    printf("\t\tGround %u: read data took %.2f us\n", i + 1, er);
+    printf("\t\tGroup %u: read data took %.2f us\n", i + 1, er);
 
     timer.restart();
     recenter(dataset, center);
     er = timer.elapsed();
 
     tot_exec_s += er;
-    printf("\t\tGround %u: re-center data took %.2f us\n", i + 1, er);
+    printf("\t\tGroup %u: re-center data took %.2f us\n", i + 1, er);
 
     timer.restart();
     auto hamming_dataset = lsh.fit(dataset);
     er = timer.elapsed();
     tot_exec_s += er;
-    printf("\t\tGround %u: calc lsh took %.2f us\n", i + 1, er);
+    printf("\t\tGroup %u: calc lsh took %.2f us\n", i + 1, er);
 
     timer.restart();
     auto n_points = hamming_dataset.size() / enc_dim;
     assert(n_points == dataset.size());
-    // for (int j = 0; j < dataset.size(); ++j)
+
     for (int j = 0; j < n_points; ++j) {
       auto fid = (hamming_dataset[j * enc_dim] &
                   N_FILES_MASK); // get the last few digits
@@ -380,8 +410,8 @@ int main(int argc, char **argv) {
     er = timer.elapsed();
     tot_exec_s += er;
     tot_exec_s /= 1e6;
-    printf("\t\tGround %u: write to files took %.2f us\n", i + 1, er);
-    printf("Ground %u: total time %.2f s, estimated remaining time for the "
+    printf("\t\tGroup %u: write to files took %.2f us\n", i + 1, er);
+    printf("Group %u: total time %.2f s, estimated remaining time for the "
            "rest groups: %.2f s\n",
            i + 1, tot_exec_s, tot_exec_s * (ng - i - 1));
   }

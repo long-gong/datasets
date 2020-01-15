@@ -26,3 +26,22 @@ void tofile(const std::vector<PointType> &data, const std::string &filename,
     }
   }
 }
+
+template <>
+void tofile(const std::vector<float> &data, const std::string &filename,
+            unsigned n, bool andprint2std) {
+  FILE *fp = fopen(filename.c_str(), "w");
+  if (!fp) {
+    perror("tofile() -- fopen() failed. ");
+  }
+  for (unsigned i = 0; i < n; ++i) {
+    fprintf(fp, "%f ", data[i]);
+    if (andprint2std) {
+      fprintf(stdout, "%f ", data[i]);
+    }
+  }
+  fprintf(fp, "\n");
+  if (andprint2std) {
+    fprintf(stdout, "\n");
+  }
+}
