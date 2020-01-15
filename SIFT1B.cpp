@@ -435,7 +435,12 @@ int main(int argc, char **argv)
 
     recenter(dataset, center);
     auto hamming_dataset = lsh.fit(dataset);
-    for (int j = 0; j < dataset.size(); ++j)
+
+      auto n_points = hamming_dataset.size() / enc_dim;
+
+      assert(n_points == dataset.size());
+    // for (int j = 0; j < dataset.size(); ++j)
+      for (int j = 0; j < n_points; ++j)
     {
       auto fid = (hamming_dataset[j * enc_dim] &
                   N_FILES_MASK); // get the last few digits

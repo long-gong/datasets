@@ -80,7 +80,8 @@ bool read_point(FILE *file, Point *point)
   auto *buf = new float[d];
   if (fread(buf, sizeof(float), d, file) != (size_t)d)
   {
-    throw runtime_error("can't read a point");
+    //throw runtime_error("can't read a point");
+    return false;
   }
   point->resize(d);
   for (int i = 0; i < d; ++i)
@@ -419,7 +420,11 @@ int main(int argc, char **argv)
     read_dataset(base_filename, &dataset, DIM, N_EACH * i, N_EACH);
     recenter(dataset, center);
     auto hamming_dataset = lsh.fit(dataset);
-    for (int j = 0; j < dataset.size(); ++j)
+
+    auto n_points = hamming_dataset.size() / enc_dim;
+    assert (n_points == dataset.size());
+    // for (int j = 0; j < dataset.size(); ++j)
+    for (int j = 0; j < n_points; ++j)
     {
       auto fid = (hamming_dataset[j * enc_dim] &
                   N_FILES_MASK); // get the last few digits
