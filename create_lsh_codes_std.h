@@ -7,6 +7,8 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <fstream>
+#include "ExceptionUtils.h"
 
 using MatrixXd = std::vector<float>;
 
@@ -20,7 +22,7 @@ public:
                                    .time_since_epoch()
                                    .count() // random seed
                )
-      : d_(dim), m_(m), seed_(seed), mat_(m, dim) {
+      : d_(dim), m_(m), seed_(seed), mat_(m * dim, 0) {
     assert(m % 64 == 0 && "Currently we only support for multiples of 64");
     genRandomVectors();
   }
@@ -60,10 +62,24 @@ public:
     return Y;
   }
 
+  void save2File(const char *filename) const {
+    std::ofstream ouf(filename);
+    auto open_success = ouf.is_open();
+    DS_REQUIRED(open_success) ;
+    for (unsigned i = 0;i < m_;++ i) {
+      unsigned sid = i * d_;
+      ouf << mat_[sid];
+      for (unsigned j = 1;j < d_;++ j) {
+        ouf << " " << mat_[sid + j];
+      }
+      ouf << "\n";
+    }
+  }
+
 private:
   void genRandomVectors() {
     std::mt19937_64 gen(seed_);
-    std::normal_distribution<double> dist_normal(0.0, 1.0);
+    std::normal_distribution<float> dist_normal(0.0, 1.0);
     for (size_t i = 0; i < m_; ++i)
       for (size_t j = 0; j < d_; ++j)
         mat_[i * d_ + j] = dist_normal(gen);

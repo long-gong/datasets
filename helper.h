@@ -25,6 +25,7 @@ void tofile(const std::vector<PointType> &data, const std::string &filename,
       fprintf(stdout, "\n");
     }
   }
+  fclose(fp);
 }
 
 template <>
@@ -44,4 +45,5 @@ void tofile(const std::vector<float> &data, const std::string &filename,
   if (andprint2std) {
     fprintf(stdout, "\n");
   }
+  fclose(fp);
 }

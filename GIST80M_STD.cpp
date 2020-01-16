@@ -175,7 +175,7 @@ std::vector<float> cal_sum(const vector<float> &dataset, // data points
 std::vector<float> cal_sum(const vector<vector<float>> &dataset) {
   unsigned dim = dataset.front().size();
   std::vector<float> sum(dim, 0.0f);
-  size_t n = dataset.size() / dim;
+  size_t n = dataset.size();
   for (size_t i = 0; i < n; ++i) {
     for (unsigned j = 0; j < dim; ++j) {
       sum[j] += dataset[i][j];
@@ -305,7 +305,7 @@ int main(int argc, char **argv) {
       if (i == 0)
         tofile<float>(dataset, "gist80m-debugging-ds.txt", 10);
 #endif
-      tn += dataset.size();
+      tn += dataset.size() / DIM;
       centers.push_back(cal_sum(dataset, DIM));
       printf("CC: %d out of %d groups were done ...\n", i + 1, ng);
     }
@@ -350,6 +350,10 @@ int main(int argc, char **argv) {
 
   SimHashCodes lsh(DIM, m, C_SEED);
 
+  #ifdef DEBUG
+  lsh.save2File("gaussian_mat.txt");
+  #endif
+
   vector<FILE *> temp_ofiles(N_FILES);
 
   for (int k = 0; k < N_FILES; ++k) {
@@ -357,6 +361,7 @@ int main(int argc, char **argv) {
     temp_ofiles[k] = fopen(fn.c_str(), "wb+");
     if (!temp_ofiles[k]) {
       perror("fopen() failed");
+      return EXIT_FAILURE;
     }
   }
 
@@ -391,7 +396,7 @@ int main(int argc, char **argv) {
 
     timer.restart();
     auto n_points = hamming_dataset.size() / enc_dim;
-    assert(n_points == dataset.size());
+    assert(n_points == dataset.size() / DIM);
 
     for (int j = 0; j < n_points; ++j) {
       auto fid = (hamming_dataset[j * enc_dim] &

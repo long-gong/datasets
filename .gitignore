@@ -3,3 +3,18 @@ cmake-*
 cmp
 
 
+*.o 
+binary-sample 
+audio 
+glove 
+enron 
+mnist 
+sift1m 
+gist1m 
+sift1b 
+gist80m
+gist80m-std
+*.dat
+*-debugging*
+*-center*
+*-for-debug*
