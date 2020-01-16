@@ -1,6 +1,6 @@
 CXX=g++
-# CXXFLAGS=-I/usr/include/hdf5/serial -std=c++14 -O3
-CXXFLAGS=-I/usr/include/hdf5/serial -std=c++14 -O3 -DDEBUG=1
+CXXFLAGS=-I/usr/include/hdf5/serial -std=c++14 -O3
+# CXXFLAGS=-I/usr/include/hdf5/serial -std=c++14 -O3 -DDEBUG=1
 LDFLAGS=-L /usr/lib/x86_64-linux-gnu/hdf5/serial/ -lxxhash -lhdf5
 # RM=rm -rf
 RM = gio trash -f
@@ -39,10 +39,10 @@ gist1m: $(COMMON_HDRS) GIST1M.cpp
 sift1b: $(COMMON_HDRS) SIFT1B.cpp
 	$(CXX) $(CXXFLAGS) SIFT1B.cpp -o $@ $(LDFLAGS)
 
-gist80m: $(COMMON_HDRS) GIST80M.cpp
-	$(CXX) $(CXXFLAGS) GIST80M.cpp -o $@ $(LDFLAGS)
+# gist80m: $(COMMON_HDRS) GIST80M.cpp
+# 	$(CXX) $(CXXFLAGS) GIST80M.cpp -o $@ $(LDFLAGS)
 
-gist80m-std: $(COMMON_HDRS) GIST80M_STD.cpp
+gist80m: $(COMMON_HDRS) GIST80M_STD.cpp
 	$(CXX) $(CXXFLAGS) GIST80M_STD.cpp -o $@ $(LDFLAGS)
 
 run: $(TARGETS)
