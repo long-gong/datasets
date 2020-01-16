@@ -1,18 +1,20 @@
 #ifndef __CREATE_LSH_CODES_H_
 #define __CREATE_LSH_CODES_H_
 
+#include "ExceptionUtils.h"
 #include <bitset>
 #include <cassert>
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <random>
 #include <vector>
-#include <fstream>
-#include "ExceptionUtils.h"
+
 
 using MatrixXd = std::vector<float>;
 
 const int INTERVAL = int(1e4);
+
 
 class SimHashCodes {
 public:
@@ -35,16 +37,32 @@ public:
     unsigned n = X.size() / d_;
 
     std::vector<uint64_t> Y(enc_dim * n);
-    std::vector<float> raw_codes(m_);
+    // changed to double (from float)
+    std::vector<double> raw_codes(m_);
 
     for (unsigned pid = 0; pid < n; ++pid) {
       const auto point = &X[pid * d_];
       for (unsigned rid = 0; rid < m_; ++rid) {
         raw_codes[rid] = 0;
         for (unsigned cid = 0; cid < d_; ++cid) {
-          raw_codes[rid] += mat_[rid * d_ + cid] * point[cid];
+          raw_codes[rid] += (double)mat_[rid * d_ + cid] * point[cid];
         }
       }
+
+#ifdef DEBUG
+      if (ind == 1189) {
+        FILE *_tfp = fopen("1189.txt", "r");
+        if (_tfp == NULL) {
+          _tfp = fopen("1189.txt", "w");
+          for (const auto &_tmp : raw_codes)
+            fprintf(_tfp, "%lf ", _tmp);
+          fclose(_tfp);
+        } else {
+          fclose(_tfp);
+        }
+      }
+
+#endif
 
       for (unsigned i = 0; i < enc_dim; ++i) {
         for (unsigned j = 0; j < 64; ++j) {
@@ -65,11 +83,11 @@ public:
   void save2File(const char *filename) const {
     std::ofstream ouf(filename);
     auto open_success = ouf.is_open();
-    DS_REQUIRED(open_success) ;
-    for (unsigned i = 0;i < m_;++ i) {
+    DS_REQUIRED(open_success);
+    for (unsigned i = 0; i < m_; ++i) {
       unsigned sid = i * d_;
       ouf << mat_[sid];
-      for (unsigned j = 1;j < d_;++ j) {
+      for (unsigned j = 1; j < d_; ++j) {
         ouf << " " << mat_[sid + j];
       }
       ouf << "\n";

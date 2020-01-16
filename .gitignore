@@ -23,3 +23,11 @@ cmp
 /sift1b-hamming-128.h5 
 /gist1m-hamming-960.h
 /.ipynb_checkpoints
+
+/*.mat
+!/compare.mat
+/GIST80M.m~
+/verify~
+/verify.m~
+/*.bin
+/1189.txt

@@ -367,6 +367,9 @@ int main(int argc, char **argv) {
 
   HighResolutionTimer timer;
 
+#ifdef DEBUG
+  FILE *codes_fp = fopen("gist80m_codes.bin", "wb");
+#endif
   double tot_exec_s = 0.0f;
   for (auto i = 0; i < ng; ++i) {
     tot_exec_s = 0.0f;
@@ -391,6 +394,9 @@ int main(int argc, char **argv) {
     timer.restart();
     auto hamming_dataset = lsh.fit(dataset);
     er = timer.elapsed();
+    #ifdef DEBUG
+    auto codes_sz = fwrite(&hamming_dataset[0], sizeof(uint64_t), hamming_dataset.size(), codes_fp);
+    #endif
     tot_exec_s += er;
     printf("\t\tGroup %u: calc lsh took %.2f us\n", i + 1, er);
 
@@ -411,7 +417,7 @@ int main(int argc, char **argv) {
       fwrite(&points_eachfile[k][0], sizeof(uint64_t),
              points_eachfile[k].size(), temp_ofiles[k]);
     }
-    printf("Encoding: %d out of %d groups were done ...\n", i + 1, ng);
+    // printf("Encoding: %d out of %d groups were done ...\n", i + 1, ng);
     er = timer.elapsed();
     tot_exec_s += er;
     tot_exec_s /= 1e6;
@@ -420,6 +426,10 @@ int main(int argc, char **argv) {
            "rest groups: %.2f s\n",
            i + 1, tot_exec_s, tot_exec_s * (ng - i - 1));
   }
+
+  #ifdef DEBUG
+  fclose(codes_fp);
+  #endif
 
   printf("Done\n");
 
