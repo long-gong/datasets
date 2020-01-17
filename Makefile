@@ -7,7 +7,7 @@ RM = gio trash -f
 
 COMMON_HDRS=Hdf5File.h create_lsh_codes.h
 TARGETS = audio glove enron mnist sift1m gist1m
-TARGETS_FOR_LF = sift1b gist80m
+TARGETS_FOR_LF = sift1b gist80m sift1b-std
 
 
 all: $(TARGETS) $(TARGETS_FOR_LF)
@@ -39,6 +39,8 @@ gist1m: $(COMMON_HDRS) GIST1M.cpp
 sift1b: $(COMMON_HDRS) SIFT1B.cpp
 	$(CXX) $(CXXFLAGS) SIFT1B.cpp -o $@ $(LDFLAGS)
 
+sift1b-std: $(COMMON_HDRS) SIFT1B_STD.cpp
+	-$(CXX) $(CXXFLAGS) SIFT1B_STD.cpp -o $@ $(LDFLAGS)
 # gist80m: $(COMMON_HDRS) GIST80M.cpp
 # 	$(CXX) $(CXXFLAGS) GIST80M.cpp -o $@ $(LDFLAGS)
 
