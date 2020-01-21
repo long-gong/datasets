@@ -350,7 +350,7 @@ int main(int argc, char **argv)
     recenter(dataset, center);
     auto hamming_dataset = lsh.fit(dataset);
     auto n_points = hamming_dataset.size() / enc_dim;
-    assert(n_points == dataset.size());
+    assert(n_points == dataset.size() / DIM);
     for (int j = 0; j < n_points; ++j)
     {
       auto fid = (hamming_dataset[j * enc_dim] &
