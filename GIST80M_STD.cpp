@@ -350,9 +350,9 @@ int main(int argc, char **argv) {
 
   SimHashCodes lsh(DIM, m, C_SEED);
 
-  #ifdef DEBUG
+#ifdef DEBUG
   lsh.save2File("gaussian_mat.txt");
-  #endif
+#endif
 
   vector<FILE *> temp_ofiles(N_FILES);
 
@@ -394,9 +394,10 @@ int main(int argc, char **argv) {
     timer.restart();
     auto hamming_dataset = lsh.fit(dataset);
     er = timer.elapsed();
-    #ifdef DEBUG
-    auto codes_sz = fwrite(&hamming_dataset[0], sizeof(uint64_t), hamming_dataset.size(), codes_fp);
-    #endif
+#ifdef DEBUG
+    auto codes_sz = fwrite(&hamming_dataset[0], sizeof(uint64_t),
+                           hamming_dataset.size(), codes_fp);
+#endif
     tot_exec_s += er;
     printf("\t\tGroup %u: calc lsh took %.2f us\n", i + 1, er);
 
@@ -427,9 +428,9 @@ int main(int argc, char **argv) {
            i + 1, tot_exec_s, tot_exec_s * (ng - i - 1));
   }
 
-  #ifdef DEBUG
+#ifdef DEBUG
   fclose(codes_fp);
-  #endif
+#endif
 
   printf("Done\n");
 

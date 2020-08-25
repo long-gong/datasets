@@ -32,7 +32,7 @@ bool read_point(FILE *file, Point *point) {
   if (fread(&d, sizeof(int), 1, file) != 1) {
     return false;
   }
-  // pay attention, although the original data is integral, it is still 
+  // pay attention, although the original data is integral, it is still
   // stored as floating-point
   float *buf = new float[d];
   if (fread(buf, sizeof(float), d, file) != (size_t)d) {
@@ -179,8 +179,9 @@ int main(int argc, char **argv) {
 
   hamming_dataset = dedup(hamming_dataset, enc_dim);
 
-  printf("converted:\n\t#points: %lu, #dim: %u\n", hamming_dataset.size() / enc_dim, m);
-  
+  printf("converted:\n\t#points: %lu, #dim: %u\n",
+         hamming_dataset.size() / enc_dim, m);
+
   vector<uint64_t> queries;
   gen_queries(&hamming_dataset, &queries, enc_dim);
 

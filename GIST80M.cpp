@@ -2,13 +2,13 @@
 #include "create_lsh_codes.h"
 #include "helper.h"
 #include <cassert>
+#include <cstdio>
+#include <cstdlib>
 #include <eigen3/Eigen/Dense>
 #include <random>
 #include <unordered_set>
 #include <vector>
 #include <xxhash.h>
-#include <cstdio>
-#include <cstdlib>
 
 #include "Timer.hpp"
 using namespace std;

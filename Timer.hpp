@@ -5,9 +5,7 @@
 
 using namespace std::chrono;
 struct HighResolutionTimer {
-  void restart() {
-    _start = high_resolution_clock::now();
-  }
+  void restart() { _start = high_resolution_clock::now(); }
 
   double elapsed() const {
     auto cur = high_resolution_clock::now();

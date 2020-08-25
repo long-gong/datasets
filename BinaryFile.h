@@ -28,9 +28,9 @@ public:
 
   ~BinaryFile();
 
-  static bool exists(const char* filename) ;
-private:
+  static bool exists(const char *filename);
 
+private:
   FILE *fp_;
 };
 

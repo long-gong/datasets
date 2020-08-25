@@ -10,11 +10,9 @@
 #include <random>
 #include <vector>
 
-
 using MatrixXd = std::vector<float>;
 
 const int INTERVAL = int(1e4);
-
 
 class SimHashCodes {
 public:
