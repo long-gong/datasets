@@ -11,7 +11,15 @@ set -x
 # Fail on unset var usage
 set -o nounset
 
-sudo apt-get install libhdf5-dev libeigen3-dev 
+if [ $TRAVIS_OS_NAME = 'osx' ]; then
+
+    # Install some custom requirements on macOS
+    # TODO
+else
+    # Install some custom requirements on Linux
+    sudo apt-get install libhdf5-dev libeigen3-dev 
+fi
+
 
 cd /tmp
 rm -rf HighFive xxHash

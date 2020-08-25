@@ -3,10 +3,6 @@ sudo: false
 matrix:
   fast_finish: true
   include:
-    - name: MaxOs clang
-      os: osx
-      compiler: clang
-      env: CXX="clang++" CC="clang" BUILD_TYPE=release
     - name: Ubuntu 18.04 gcc
       os: linux
       dist: bionic
