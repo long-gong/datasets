@@ -15,6 +15,7 @@ if [ $TRAVIS_OS_NAME = 'osx' ]; then
 
     # Install some custom requirements on macOS
     # TODO
+    echo "To be supported"
 else
     # Install some custom requirements on Linux
     sudo apt-get install libhdf5-dev libeigen3-dev 
