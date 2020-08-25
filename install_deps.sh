@@ -3,10 +3,10 @@
 # Dataset dependency install script for Ubuntu and Fedora
 
 # Fail on error
-set -e 
+set -e
 
 # Echo on
-set -x 
+set -x
 
 # Fail on unset var usage
 set -o nounset
@@ -17,8 +17,10 @@ if [ $TRAVIS_OS_NAME = 'osx' ]; then
     # TODO
     echo "To be supported"
 else
+    sudo add-apt-repository -y universe
+    sudo apt-get -q update
     # Install some custom requirements on Linux
-    sudo apt-get install libhdf5-dev libeigen3-dev 
+    sudo apt-get install libhdf5-dev libeigen3-dev
 fi
 
 
